@@ -20,7 +20,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('playstyle, us_squash_rating, level_descriptor, days_per_week, avg_session_min, has_partner_default, gym_access, goal_type, injuries')
+    .select('playstyle, us_squash_rating, level_descriptor, days_per_week, avg_session_min, has_partner_default, gym_access, goal_type, injuries, focus_areas, recent_context, season_status')
     .eq('id', userId)
     .single()
   if (!profile) return res.status(400).json({ error: 'Complete onboarding first' })
@@ -40,6 +40,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const refDate = bodyDate && /^\d{4}-\d{2}-\d{2}$/.test(bodyDate) ? bodyDate : new Date().toISOString().slice(0, 10)
   const weekStart = startOfWeekISO(refDate)
   const phase = macroRow ? currentPhase(macroRow as Macrocycle, weekStart).name : 'General Prep'
+
+  const { data: recentMsgs } = await supabase
+    .from('coach_messages')
+    .select('role, content')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(8)
+  const coachNotes = (recentMsgs ?? [])
+    .reverse()
+    .map((m) => `${m.role === 'coach' ? 'Coach' : 'Athlete'}: ${m.content}`)
+    .join(' | ')
+    .slice(0, 1500)
 
   const lastWeekStart = addWeeks(weekStart, -1)
   let lastWeek = { planned: 0, completed: 0, rpeTrend: 'n/a', journalThemes: 'n/a' }
@@ -68,8 +80,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   let raw: string | null = null
   try {
     const messages = buildWeeklyMessages({
-      profile: { ...profile, injuries: (profile.injuries as string[]) ?? [] },
-      phase, weekStart, lastWeek,
+      profile: {
+        ...profile,
+        injuries: (profile.injuries as string[]) ?? [],
+        focus_areas: (profile.focus_areas as string[]) ?? [],
+      },
+      phase, weekStart, lastWeek, coachNotes,
     })
     const json = await callGroqJSON(messages)
     raw = JSON.stringify(json)
