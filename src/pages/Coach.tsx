@@ -31,11 +31,17 @@ export default function Coach() {
     setInput('')
     setError(null)
     setSending(true)
-    const optimistic: CoachMessage = { id: `tmp-${messages.length}`, role: 'user', content: text, created_at: '' }
+    const optimisticId = `tmp-${messages.length}`
+    const optimistic: CoachMessage = { id: optimisticId, role: 'user', content: text, created_at: '' }
     setMessages((m) => [...m, optimistic])
     const r = await sendCoachMessage(text)
     setSending(false)
-    if (r.error) return setError(r.error)
+    if (r.error) {
+      // Roll back the optimistic bubble and give the user their text back to retry.
+      setMessages((m) => m.filter((msg) => msg.id !== optimisticId))
+      setInput(text)
+      return setError(r.error)
+    }
     if (uid) setMessages(await loadCoachMessages(uid))
   }
 
