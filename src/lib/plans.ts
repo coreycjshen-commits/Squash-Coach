@@ -46,7 +46,10 @@ export async function generateWeek(): Promise<{ ok: boolean; source?: string; er
   if (!token) return { ok: false, error: 'Not signed in' }
   const res = await fetch('/api/generate-week', {
     method: 'POST',
-    headers: { authorization: `Bearer ${token}` },
+    headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+    // Send the client's local week start so the server writes the plan under the same
+    // Monday the client queries with (guards the UTC-vs-local Sun→Mon boundary).
+    body: JSON.stringify({ weekStart: startOfWeekISO(todayISO()) }),
   })
   const body = await res.json().catch(() => ({}))
   if (!res.ok) return { ok: false, error: body.error ?? `Server error ${res.status}` }

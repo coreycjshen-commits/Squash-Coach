@@ -110,16 +110,23 @@ function SessionEditor({ session, onSaved }: { session: SessionRow; onSaved: () 
   const [duration, setDuration] = useState(String(session.duration_min ?? ''))
   const [rpe, setRpe] = useState(String(session.target_rpe ?? ''))
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function save() {
     setSaving(true)
-    await updateSession(session.id, {
-      focus,
-      duration_min: duration === '' ? null : Number(duration),
-      target_rpe: rpe === '' ? null : Number(rpe),
-    })
-    setSaving(false)
-    onSaved()
+    setError(null)
+    try {
+      await updateSession(session.id, {
+        focus: focus.trim() === '' ? null : focus,
+        duration_min: duration === '' ? null : Number(duration),
+        target_rpe: rpe === '' ? null : Number(rpe),
+      })
+      onSaved()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not save this session.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -135,6 +142,7 @@ function SessionEditor({ session, onSaved }: { session: SessionRow; onSaved: () 
           <Input id={`r-${session.id}`} type="number" min="1" max="10" value={rpe} onChange={(e) => setRpe(e.target.value)} />
         </Field>
       </div>
+      {error && <p className="text-sm text-red-400">{error}</p>}
       <div><Button onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save session'}</Button></div>
     </div>
   )

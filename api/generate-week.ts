@@ -27,13 +27,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const { data: macroRow } = await supabase
     .from('macrocycles')
-    .select('start_date, end_date, block_type, phases')
+    .select('id, start_date, end_date, block_type, phases')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
 
-  const weekStart = startOfWeekISO(new Date().toISOString().slice(0, 10))
+  // Derive weekStart from the CLIENT's calendar date when supplied, so the plan is written
+  // under the same Monday the client will query with (avoids a UTC-vs-local boundary mismatch
+  // near Sun→Mon). startOfWeekISO normalises to Monday either way, so this is safe/idempotent.
+  const bodyDate = typeof req.body?.weekStart === 'string' ? req.body.weekStart : null
+  const refDate = bodyDate && /^\d{4}-\d{2}-\d{2}$/.test(bodyDate) ? bodyDate : new Date().toISOString().slice(0, 10)
+  const weekStart = startOfWeekISO(refDate)
   const phase = macroRow ? currentPhase(macroRow as Macrocycle, weekStart).name : 'General Prep'
 
   const lastWeekStart = addWeeks(weekStart, -1)
@@ -80,7 +85,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     .from('weekly_plans')
     .insert({
       user_id: userId,
-      macrocycle_id: null,
+      macrocycle_id: macroRow?.id ?? null,
       week_start: weekStart,
       phase,
       rationale: plan.rationale,
