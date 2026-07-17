@@ -13,7 +13,7 @@ changes type, or becomes rest.
 
 ## 1. Decisions locked in brainstorming
 
-- **Infra/keys:** Corey owns the Supabase project, Gemini API key, and Vercel project.
+- **Infra/keys:** Corey owns the Supabase project, Groq API key, and Vercel project.
   Claude builds the app and walks Corey through each external setup step live. Claude
   never enters credentials or creates accounts.
 - **Build cadence:** Per-phase checkpoints — a working, verifiable slice at each phase
@@ -27,8 +27,8 @@ changes type, or becomes rest.
 ## 2. Architecture
 
 ```
-React (Vite + TS) SPA  ──►  Vercel Serverless Functions (/api/*)  ──►  Gemini API
-        │                            │  (GEMINI_API_KEY server-only)
+React (Vite + TS) SPA  ──►  Vercel Serverless Functions (/api/*)  ──►  Groq API
+        │                            │  (GROQ_API_KEY server-only)
         └──────────► Supabase (Postgres + Auth + RLS) ◄──────────┘
 ```
 
@@ -38,12 +38,15 @@ React (Vite + TS) SPA  ──►  Vercel Serverless Functions (/api/*)  ──�
 - **Server-side LLM:** two Vercel serverless functions (`/api/*`). Each reads the
   caller's Supabase access token from the `Authorization` header, creates a per-request
   Supabase client bound to that token so **RLS is enforced even server-side**, fetches
-  the data it needs, builds the prompt, calls Gemini with a strict JSON response schema,
-  validates with Zod, writes results back, logs the decision, and returns to the client.
-- **`GEMINI_API_KEY`** lives only in Vercel environment variables — never in client code,
+  the data it needs, builds the prompt, calls Groq (OpenAI-compatible API) in JSON-object
+  output mode, validates with Zod, writes results back, logs the decision, and returns to the client.
+- **`GROQ_API_KEY`** lives only in Vercel environment variables — never in client code,
   never committed.
-- **Model:** `gemini-2.5-flash` on the free AI Studio tier (confirm current free
-  model + limits at build time). ~8 calls/week is far below quota.
+- **Provider/model:** Groq (`https://api.groq.com/openai/v1`), default model
+  `llama-3.3-70b-versatile` (configurable via `GROQ_MODEL`; `openai/gpt-oss-120b` is a
+  stronger-reasoning alternative). Free tier, no card. ~8 calls/week is far below the limits.
+  *(Swapped from Gemini at Corey's request during Phase 1 — no LLM code existed yet, so this
+  was config-only.)*
 
 ## 3. LLM integration (the coaching brain)
 
@@ -58,12 +61,12 @@ Runs on a new week or an explicit re-plan request (not on page load).
 
 ### Call 2 — Daily check-in interpretation (`POST /api/checkin`)
 Runs after a check-in is submitted.
-- **Guardrails run FIRST, server-side, before Gemini:**
+- **Guardrails run FIRST, server-side, before the LLM call:**
   1. Journal text matches injury/pain keywords (e.g. "pain", "sharp", "tweaked",
      "strain", "pulled", "injured") → force **rest**.
   2. Wearable extreme outlier vs. baseline (RHR ≫ baseline, HRV ≪ baseline, sleep < 4h)
      → force **rest**.
-  If a guardrail fires, skip Gemini, return a rule-based rest decision, still log it.
+  If a guardrail fires, skip the LLM call, return a rule-based rest decision, still log it.
 - **Inputs (if no guardrail fired):** today's planned session, wearable deltas vs. the
   user's own 7-day rolling baseline (HRV, RHR, sleep), yesterday's RPE, today's
   availability (partner/court/minutes), journal text.
@@ -139,7 +142,7 @@ Design tokens defined once as CSS variables + Tailwind theme extension.
 
 ## 8. Testing
 Vitest on the deterministic core: baseline/ACWR math, guardrail keyword + outlier logic,
-JSON schema validation, solo-substitution mapping. Gemini mocked in tests. Light component
+JSON schema validation, solo-substitution mapping. The LLM (Groq) mocked in tests. Light component
 tests on the check-in flow.
 
 ## 9. Build sequence (each phase ends in a working, verifiable slice)
