@@ -5,8 +5,7 @@ import { supabase } from '../lib/supabase'
 const tabs = [
   { to: '/', label: 'Today' },
   { to: '/week', label: 'Week' },
-  { to: '/journal', label: 'Journal' },
-  { to: '/progress', label: 'Progress' },
+  { to: '/coach', label: 'Coach' },
   { to: '/profile', label: 'Profile' },
 ]
 

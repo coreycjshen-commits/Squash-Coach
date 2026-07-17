@@ -5,6 +5,7 @@ import Login from './pages/Login'
 import Onboarding from './pages/Onboarding'
 import Today from './pages/Today'
 import Week from './pages/Week'
+import Coach from './pages/Coach'
 import Journal from './pages/Journal'
 import Progress from './pages/Progress'
 import Profile from './pages/Profile'
@@ -29,6 +30,7 @@ export default function App() {
               <Routes>
                 <Route path="/" element={<Today />} />
                 <Route path="/week" element={<Week />} />
+                <Route path="/coach" element={<Coach />} />
                 <Route path="/journal" element={<Journal />} />
                 <Route path="/progress" element={<Progress />} />
                 <Route path="/profile" element={<Profile />} />
