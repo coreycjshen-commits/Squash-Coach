@@ -21,6 +21,9 @@ export interface ProfileData {
   goal_type: string | null
   goal_target_date: string | null
   injuries: string[]
+  focus_areas: string[]
+  recent_context: string | null
+  season_status: string | null
 }
 
 export const EMPTY_PROFILE: ProfileData = {
@@ -38,19 +41,35 @@ export const EMPTY_PROFILE: ProfileData = {
   goal_type: null,
   goal_target_date: null,
   injuries: [],
+  focus_areas: [],
+  recent_context: null,
+  season_status: 'general',
 }
+
+export const SEASON_OPTIONS = [
+  { value: 'off_season', label: 'Off-season (base building)' },
+  { value: 'pre_season', label: 'Pre-season (ramping up)' },
+  { value: 'in_season', label: 'In-season (competing)' },
+  { value: 'injury_return', label: 'Returning from injury/break' },
+  { value: 'general', label: 'General / no set season' },
+] as const
 
 /** Load the current user's profile fields into a ProfileData shape (nulls if unset). */
 export async function loadProfile(userId: string): Promise<ProfileData> {
   const { data, error } = await supabase
     .from('profiles')
     .select(
-      'playstyle, us_squash_rating, level_descriptor, years_playing, weekly_oncourt_hours, strength_experience, days_per_week, avg_session_min, schedule_flexibility, has_partner_default, gym_access, goal_type, goal_target_date, injuries',
+      'playstyle, us_squash_rating, level_descriptor, years_playing, weekly_oncourt_hours, strength_experience, days_per_week, avg_session_min, schedule_flexibility, has_partner_default, gym_access, goal_type, goal_target_date, injuries, focus_areas, recent_context, season_status',
     )
     .eq('id', userId)
     .single()
   if (error) throw error
-  return { ...EMPTY_PROFILE, ...data, injuries: (data?.injuries as string[]) ?? [] }
+  return {
+    ...EMPTY_PROFILE,
+    ...data,
+    injuries: (data?.injuries as string[]) ?? [],
+    focus_areas: (data?.focus_areas as string[]) ?? [],
+  }
 }
 
 /** Update profile fields only (used by the Profile edit page). */
