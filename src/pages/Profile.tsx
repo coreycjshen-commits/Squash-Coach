@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useSession } from '../auth/useSession'
 import {
-  loadProfile, updateProfile, loadMacrocycle, EMPTY_PROFILE, type ProfileData,
+  loadProfile, updateProfile, loadMacrocycle, EMPTY_PROFILE, SEASON_OPTIONS, type ProfileData,
 } from '../lib/profile'
 import { currentPhase, type Macrocycle } from '../lib/macrocycle'
 import { todayISO } from '../lib/dates'
-import { Button, Card, Input, Field } from '../components/ui'
+import { Button, Card, Input, Field, Textarea, Select } from '../components/ui'
 
 export default function Profile() {
   const { session } = useSession()
@@ -96,6 +96,20 @@ export default function Profile() {
           <Field label="Injuries (one per line)" htmlFor="p-inj">
             <Input id="p-inj" type="text" value={data.injuries.join(', ')}
               onChange={(e) => setData({ ...data, injuries: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })} />
+          </Field>
+          <Field label="What you want to work on (one per line)" htmlFor="p-focus">
+            <Textarea id="p-focus" value={data.focus_areas.join('\n')}
+              onChange={(e) => setData({ ...data, focus_areas: e.target.value.split('\n').map((s) => s.trim()).filter(Boolean) })} />
+          </Field>
+          <Field label="Season" htmlFor="p-season">
+            <Select id="p-season" value={data.season_status ?? 'general'}
+              onChange={(e) => setData({ ...data, season_status: e.target.value })}>
+              {SEASON_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </Select>
+          </Field>
+          <Field label="Recent training & context" htmlFor="p-recent">
+            <Textarea id="p-recent" value={data.recent_context ?? ''}
+              onChange={(e) => setData({ ...data, recent_context: e.target.value || null })} />
           </Field>
         </div>
         {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
