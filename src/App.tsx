@@ -1,10 +1,42 @@
+import { Routes, Route } from 'react-router-dom'
+import { Protected } from './auth/Protected'
+import { AppShell } from './components/AppShell'
+import Login from './pages/Login'
+import Onboarding from './pages/Onboarding'
+import Today from './pages/Today'
+import Week from './pages/Week'
+import Journal from './pages/Journal'
+import Progress from './pages/Progress'
+import Profile from './pages/Profile'
+
 export default function App() {
   return (
-    <div className="min-h-full grid place-items-center gap-4 p-8">
-      <h1 className="text-3xl font-semibold">Squash Coach</h1>
-      <button className="rounded-xl bg-accent px-4 py-2 font-medium text-accent-fg">
-        Amber on navy
-      </button>
-    </div>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route
+        path="/onboarding"
+        element={
+          <Protected>
+            <Onboarding />
+          </Protected>
+        }
+      />
+      <Route
+        path="/*"
+        element={
+          <Protected>
+            <AppShell>
+              <Routes>
+                <Route path="/" element={<Today />} />
+                <Route path="/week" element={<Week />} />
+                <Route path="/journal" element={<Journal />} />
+                <Route path="/progress" element={<Progress />} />
+                <Route path="/profile" element={<Profile />} />
+              </Routes>
+            </AppShell>
+          </Protected>
+        }
+      />
+    </Routes>
   )
 }
