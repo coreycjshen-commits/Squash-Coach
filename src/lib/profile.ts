@@ -60,29 +60,45 @@ export async function updateProfile(userId: string, p: ProfileData): Promise<voi
 }
 
 /**
- * Onboarding submit: save the profile, mark onboarding complete, and create the macrocycle.
- * Idempotent enough for a re-run: replaces any existing macrocycle for the user.
+ * Onboarding submit: save the profile fields, create the macrocycle, and only then
+ * mark onboarding complete.
+ *
+ * Ordering matters for robustness: the macrocycle is inserted BEFORE `onboarding_complete`
+ * is flipped, so a failure at any earlier step leaves the user still un-onboarded (the gate
+ * keeps them in this flow to retry) rather than stranded as "onboarded" with no training block.
+ * Re-runs replace any prior macrocycle: we insert the new one first, then delete the others,
+ * so a failed insert never wipes an existing block.
  */
 export async function saveOnboarding(userId: string, p: ProfileData): Promise<void> {
-  const { error: pErr } = await supabase
-    .from('profiles')
-    .update({ ...p, onboarding_complete: true })
-    .eq('id', userId)
+  // 1. Save profile fields (but NOT onboarding_complete yet).
+  const { error: pErr } = await supabase.from('profiles').update(p).eq('id', userId)
   if (pErr) throw pErr
 
+  // 2. Insert the new macrocycle and capture its id.
   const start = todayISO()
   const m = buildMacrocycle(start, p.goal_target_date)
-
-  await supabase.from('macrocycles').delete().eq('user_id', userId)
-
-  const { error: mErr } = await supabase.from('macrocycles').insert({
-    user_id: userId,
-    start_date: m.start_date,
-    end_date: m.end_date,
-    block_type: m.block_type,
-    phases: m.phases,
-  })
+  const { data: inserted, error: mErr } = await supabase
+    .from('macrocycles')
+    .insert({
+      user_id: userId,
+      start_date: m.start_date,
+      end_date: m.end_date,
+      block_type: m.block_type,
+      phases: m.phases,
+    })
+    .select('id')
+    .single()
   if (mErr) throw mErr
+
+  // 3. Drop any older macrocycles for this user (keep only the one just inserted).
+  await supabase.from('macrocycles').delete().eq('user_id', userId).neq('id', inserted.id)
+
+  // 4. Finally flip the gate — everything above succeeded.
+  const { error: cErr } = await supabase
+    .from('profiles')
+    .update({ onboarding_complete: true })
+    .eq('id', userId)
+  if (cErr) throw cErr
 }
 
 /** Load the user's macrocycle (or null). */
