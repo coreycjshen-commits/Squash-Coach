@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button, Card, Input, Select, Textarea, Field, RadioCards } from '../components/ui'
-import { EMPTY_PROFILE, saveOnboarding, type ProfileData } from '../lib/profile'
+import { EMPTY_PROFILE, saveOnboarding, SEASON_OPTIONS, type ProfileData } from '../lib/profile'
 import { useSession } from '../auth/useSession'
 import { STEPS, PLAYSTYLE_OPTIONS, GYM_OPTIONS } from './steps'
 
@@ -164,6 +164,31 @@ export function OnboardingForm() {
                 <Field label="Gym access">
                   <RadioCards name="gym" options={GYM_OPTIONS} value={data.gym_access}
                     onChange={(v) => set({ gym_access: v as ProfileData['gym_access'] })} />
+                </Field>
+              </>
+            )}
+
+            {step.id === 'context' && (
+              <>
+                <Field label="What do you want to work on?" hint="One per line — e.g. backhand length, deception, fitness in long rallies." htmlFor="focus">
+                  <Textarea id="focus"
+                    placeholder={'straight-drive length\nmovement to the front\nfitness for long matches'}
+                    value={data.focus_areas.join('\n')}
+                    onChange={(e) => set({ focus_areas: e.target.value.split('\n').map((s) => s.trim()).filter(Boolean) })}
+                  />
+                </Field>
+                <Field label="Where are you in your season?" htmlFor="season">
+                  <Select id="season" value={data.season_status ?? 'general'}
+                    onChange={(e) => set({ season_status: e.target.value })}>
+                    {SEASON_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </Select>
+                </Field>
+                <Field label="Recent training & anything going on" hint="What you've been doing lately, breaks, niggles, life context — anything the coach should know." htmlFor="recent">
+                  <Textarea id="recent"
+                    placeholder="e.g. took 3 weeks off for exams, just getting back into it; playing club matches on weekends"
+                    value={data.recent_context ?? ''}
+                    onChange={(e) => set({ recent_context: e.target.value || null })}
+                  />
                 </Field>
               </>
             )}

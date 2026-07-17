@@ -69,6 +69,12 @@ export const STEPS: StepDef[] = [
     validate: () => null,
   },
   {
+    id: 'context',
+    title: 'What are you focused on?',
+    subtitle: 'This is what makes the coaching yours — and you can change it anytime later.',
+    validate: () => null,
+  },
+  {
     id: 'goals',
     title: 'Goals',
     subtitle: 'What are you training toward? A target date sharpens the periodization.',
