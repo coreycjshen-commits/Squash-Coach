@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useSession } from '../auth/useSession'
 import { loadCurrentWeek, generateWeek, updateSession, type WeekPlan, type SessionRow } from '../lib/plans'
 import { Button, Card, Input, Field } from '../components/ui'
+import { SessionDetail } from '../components/SessionDetail'
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const TYPE_LABEL: Record<SessionRow['type'], string> = {
@@ -90,11 +91,7 @@ export default function Week() {
             </Button>
           </div>
 
-          {s.detail && Object.keys(s.detail).length > 0 && (
-            <pre className="mt-3 overflow-x-auto rounded-lg bg-surface-2 p-3 text-xs text-muted">
-              {JSON.stringify(s.detail, null, 2)}
-            </pre>
-          )}
+          {s.detail && <SessionDetail detail={s.detail} />}
 
           {editing === s.id && (
             <SessionEditor session={s} onSaved={async () => { setEditing(null); await refresh() }} />
