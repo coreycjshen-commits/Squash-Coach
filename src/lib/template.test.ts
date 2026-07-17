@@ -24,6 +24,14 @@ describe('buildTemplateWeek', () => {
     const other = plan.sessions.filter((s) => s.type !== 'oncourt' && s.type !== 'rest').length
     expect(court).toBeGreaterThanOrEqual(other)
   })
+  it('puts on-court squash on most training days', () => {
+    for (const phase of ['General Prep', 'Specific Prep', 'Pre-Competitive / Power', 'Competition / Maintenance']) {
+      const plan = buildTemplateWeek(phase, 5, 60)
+      const training = plan.sessions.filter((s) => s.type !== 'rest')
+      const court = training.filter((s) => s.type === 'oncourt').length
+      expect(court).toBeGreaterThan(training.length / 2)
+    }
+  })
   it('every session satisfies duration/RPE ranges', () => {
     const plan = buildTemplateWeek('Pre-Competitive / Power', 3, 45)
     for (const s of plan.sessions) {
