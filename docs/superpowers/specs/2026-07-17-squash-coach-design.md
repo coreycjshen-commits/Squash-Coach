@@ -153,6 +153,27 @@ tests on the check-in flow.
 4. Adaptive logic (LLM call 2 + guardrails).
 5. Progress + journal + review.
 
+## 9b. Conversational & contextual coaching (added Phase 2.5, at Corey's request)
+
+The plan generator alone felt like a generator, not a coach. Added:
+
+- **Editable Focus & context** (on `profiles`): `focus_areas` (what you want to work on),
+  `recent_context` (recent training, breaks, what you've been doing), `season_status`
+  (off-season / pre-season / in-season / injury-return / general). Captured at onboarding,
+  **editable anytime**, and fed into every weekly plan and the coach chat.
+- **Coach chat** — a persistent conversation thread (`coach_messages` table) with the coach.
+  The coach knows the full profile, current phase, focus/context, and current week's plan.
+  This is where discussion and pushback happen ("more court time", "I took two weeks off",
+  "it's off-season"). A third server-side LLM call (`/api/coach-chat`, conversational text,
+  not JSON). Recent chat is summarized into the weekly-plan prompt so conversations shape plans.
+  From the chat, "build/update my week" triggers `/api/generate-week`.
+- **Coaching philosophy — squash most days:** on-court work appears on most training days
+  (even light days keep court touch via technical/ghosting/solo feeds); dedicated
+  conditioning/mobility or full rest is reserved for recovery days. Baked into the plan prompt
+  and the deterministic template.
+- **UI:** session `detail` renders as clean, readable content (warm-up/drills/lifts/intervals),
+  not raw JSON; nav trimmed to built surfaces (Today, Week, Coach, Profile).
+
 ## 10. Explicit non-goals for v1
 - Real wearable OAuth sync (stub the import hook only).
 - Coach/athlete roles and sharing UI (RLS is ready; UI is not built).
