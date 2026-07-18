@@ -143,3 +143,61 @@ export function buildCoachMessages(input: CoachChatInput): ChatMessage[] {
     { role: 'user', content: input.userMessage },
   ]
 }
+
+export interface CheckinPromptInput {
+  profile: WeeklyPromptInput['profile']
+  phase: string
+  plannedSession: { type: string; focus: string | null; duration_min: number | null; target_rpe: number | null } | null
+  deltas: { hrv_delta: number | null; rhr_delta: number | null; sleep_delta: number | null }
+  sleep_hours: number | null
+  yesterday_rpe: number | null
+  partner_available: boolean
+  court_available: boolean
+  minutes_available: number | null
+  journal: string
+}
+
+const CHECKIN_SYSTEM = `You are a squash coach interpreting an athlete's morning check-in to decide how to run TODAY's
+planned session. Weigh recovery signals against your own athlete's baseline (deltas are today − their 7-day average):
+- HRV notably below baseline, resting HR above baseline, poor/short sleep, high soreness, or a fatigued/low journal
+  tone → scale down or change to something lighter.
+- Clearly fresh and recovering well → keep, or scale up slightly if the plan was conservative.
+- Signals stacking up (poor sleep + elevated RHR + depressed/exhausted tone) → recommend REST and say why.
+- If no partner/court but the plan needs them, change modality to an equivalent solo/ghosting/fitness session.
+- If they have far less time than the session needs, scale the session to fit.
+Be decisive and specific, and keep the athlete's goal/phase in mind. Protect them from ramping too fast after a light patch.
+
+Return STRICT JSON ONLY:
+{"decision":"keep"|"scale_down"|"scale_up"|"change_modality"|"rest","rationale": string (1-2 sentences, plain and specific),
+"adjusted_session": null | {"type":"oncourt"|"strength"|"cardio"|"rest","focus":string,"duration_min":int,"target_rpe":int 1-10,"detail":object}}
+Set "adjusted_session" to null ONLY when decision is "keep". For every other decision, provide the concrete adjusted
+session with the SAME trainer-level specificity as a normal plan (named drills, sets × time, intervals, loads).`
+
+export function buildCheckinMessages(input: CheckinPromptInput): ChatMessage[] {
+  const p = input.profile
+  const s = input.plannedSession
+  const user = `ATHLETE: ${p.playstyle ?? 'unspecified'} player, level ${p.us_squash_rating != null ? `US Squash ${p.us_squash_rating}` : p.level_descriptor ?? 'unspecified'}; goal ${p.goal_type ?? 'general'}; phase ${input.phase}; injuries: ${p.injuries.length ? p.injuries.join('; ') : 'none'}.
+
+TODAY'S PLANNED SESSION: ${s ? `${s.type} — ${s.focus ?? ''} (${s.duration_min ?? '?'} min, RPE ${s.target_rpe ?? '?'})` : 'none planned'}
+
+CHECK-IN vs BASELINE (today − 7-day avg):
+- HRV delta: ${fmtDelta(input.deltas.hrv_delta, 'ms')}
+- Resting HR delta: ${fmtDelta(input.deltas.rhr_delta, 'bpm')}
+- Sleep delta: ${fmtDelta(input.deltas.sleep_delta, 'h')} (slept ${input.sleep_hours ?? '?'}h)
+- Yesterday's session RPE: ${input.yesterday_rpe ?? 'n/a'}
+
+TODAY'S AVAILABILITY: partner ${input.partner_available ? 'yes' : 'no'}, court ${input.court_available ? 'yes' : 'no'}, time ${input.minutes_available ?? '?'} min.
+
+JOURNAL: ${input.journal || '(none)'}
+
+Decide how to run today. Return the JSON.`
+  return [
+    { role: 'system', content: CHECKIN_SYSTEM },
+    { role: 'user', content: user },
+  ]
+}
+
+function fmtDelta(v: number | null, unit: string): string {
+  if (v == null) return 'n/a (no baseline yet)'
+  return `${v > 0 ? '+' : ''}${v} ${unit}`
+}
