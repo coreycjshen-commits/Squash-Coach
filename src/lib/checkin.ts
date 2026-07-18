@@ -20,6 +20,10 @@ export interface CheckinRow {
   rhr_delta: number | null
   sleep_delta: number | null
   acwr: number | null
+  decision: string | null
+  decision_rationale: string | null
+  adjusted_session: Record<string, unknown> | null
+  decision_source: string | null
 }
 
 export interface TodaySessionRow {
@@ -132,20 +136,30 @@ export async function saveCheckin(userId: string, input: CheckinInput): Promise<
   }
 }
 
+export async function requestDecision(): Promise<{ ok: boolean; error?: string }> {
+  const { data } = await supabase.auth.getSession()
+  const token = data.session?.access_token
+  if (!token) return { ok: false, error: 'Not signed in' }
+  const res = await fetch('/api/checkin', {
+    method: 'POST',
+    headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+    body: JSON.stringify({ date: todayISO() }),
+  })
+  const body = await res.json().catch(() => ({}))
+  if (!res.ok) return { ok: false, error: body.error ?? `Server error ${res.status}` }
+  return { ok: true }
+}
+
 export async function completeSession(
   userId: string,
-  input: { session_id: string | null; actual_type: string; actual_duration: number | null; actual_rpe: number | null; notes: string },
+  input: { session_id: string | null; actual_type: string; actual_duration: number | null; actual_rpe: number | null; adjustment: string | null; notes: string },
 ): Promise<void> {
   const date = todayISO()
   await supabase.from('completed_sessions').delete().eq('user_id', userId).eq('date', date)
   const { error } = await supabase.from('completed_sessions').insert({
-    user_id: userId,
-    session_id: input.session_id,
-    date,
-    actual_type: input.actual_type,
-    actual_duration: input.actual_duration,
-    actual_rpe: input.actual_rpe,
-    notes: input.notes.trim() || null,
+    user_id: userId, session_id: input.session_id, date,
+    actual_type: input.actual_type, actual_duration: input.actual_duration, actual_rpe: input.actual_rpe,
+    adjustment: input.adjustment, notes: input.notes.trim() || null,
   })
   if (error) throw error
 }

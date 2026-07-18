@@ -59,7 +59,7 @@ export default function Today() {
         <CompleteSessionForm
           defaultType={ctx.session.type}
           defaultDuration={ctx.session.duration_min}
-          onSubmit={async (i) => { await completeSession(uid!, { session_id: ctx.session!.id, ...i }); await refresh() }}
+          onSubmit={async (i) => { await completeSession(uid!, { session_id: ctx.session!.id, adjustment: 'keep', ...i }); await refresh() }}
         />
       )}
 
