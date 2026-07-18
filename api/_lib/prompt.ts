@@ -65,9 +65,14 @@ Requirements by type:
   "6-point ghosting (2 front, 2 mid, 2 back): explode to each corner and shadow the shot — 6 × 40s work / 50s rest",
   "Drop-drive condition game to back-2/front-2: first to 11, must win by 2 — 3 games".
   Always include "warm_up" (specific: e.g. "5 min court movement + 20 boast-drive-drive feeds each side").
-- cardio: name the modality AND the full interval structure with work, rest, sets, and a target.
-  e.g. "10 × 15s max court sprints (baseline↔front wall), 45s walk, ×2 sets, 3 min between sets @ RPE 9".
-  Steady-state must give duration + zone, e.g. "35 min run @ RPE 5 / zone 2, HR ~140-150".
+- cardio: THE MOST EXPLICIT of all. NEVER write "30 min intervals" or "conditioning". Always give the
+  modality + the exact interval prescription in the form "N × [work] @ effort / [rest] recovery", plus
+  sets and between-set rest. Every number stated. Examples of the required form:
+  "12 × 30s hard / 30s easy on the bike @ RPE 8",
+  "10 × 15s max court sprints (baseline↔front wall) / 45s walk, ×2 sets, 3 min between sets @ RPE 9",
+  "6 × 400m run @ ~90% / 90s standing rest".
+  Break long "intervals" strings into a "warm_up", the interval line, and a "cool_down".
+  Steady-state (only when building base) must give duration + zone + target HR, e.g. "35 min run @ RPE 5 / zone 2, HR ~140-150".
 - strength: each lift with sets × reps AND load guidance (%1RM or RPE) and tempo/rest where it matters.
   e.g. "Back squat 4 × 5 @ RPE 8 (~80%), 2-3 min rest", "Nordic curl 3 × 6 slow eccentric", "Pallof press 3 × 10/side".
 
