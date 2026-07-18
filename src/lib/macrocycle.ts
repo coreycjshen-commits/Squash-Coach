@@ -1,4 +1,4 @@
-import { weeksBetween, addWeeks } from './dates'
+import { weeksBetween, addWeeks } from './dates.js'
 
 export type BlockType = 'fixed_goal' | 'rolling'
 export interface Phase {

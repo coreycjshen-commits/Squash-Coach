@@ -1,12 +1,12 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { clientFromRequest } from './_lib/supabaseServer'
-import { callGroqJSON } from './_lib/groq'
-import { buildWeeklyMessages } from './_lib/prompt'
-import { WeeklyPlanSchema, type WeeklyPlan } from '../src/lib/planSchema'
-import { buildTemplateWeek } from '../src/lib/template'
-import { currentPhase, type Macrocycle } from '../src/lib/macrocycle'
-import { startOfWeekISO } from '../src/lib/week'
-import { addWeeks } from '../src/lib/dates'
+import { clientFromRequest } from './_lib/supabaseServer.js'
+import { callGroqJSON } from './_lib/groq.js'
+import { buildWeeklyMessages } from './_lib/prompt.js'
+import { WeeklyPlanSchema, type WeeklyPlan } from '../src/lib/planSchema.js'
+import { buildTemplateWeek } from '../src/lib/template.js'
+import { currentPhase, type Macrocycle } from '../src/lib/macrocycle.js'
+import { startOfWeekISO } from '../src/lib/week.js'
+import { addWeeks } from '../src/lib/dates.js'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })

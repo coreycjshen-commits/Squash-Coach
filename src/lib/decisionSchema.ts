@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { SESSION_TYPES } from './planSchema'
+import { SESSION_TYPES } from './planSchema.js'
 
 export const DECISIONS = ['keep', 'scale_down', 'scale_up', 'change_modality', 'rest'] as const
 

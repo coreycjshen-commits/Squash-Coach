@@ -1,5 +1,5 @@
-import type { WeeklyPlan, PlanSession } from './planSchema'
-import { SESSION_TYPES } from './planSchema'
+import type { WeeklyPlan, PlanSession } from './planSchema.js'
+import { SESSION_TYPES } from './planSchema.js'
 
 type TrainingType = Exclude<(typeof SESSION_TYPES)[number], 'rest'>
 

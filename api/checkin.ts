@@ -1,11 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { clientFromRequest } from './_lib/supabaseServer'
-import { callGroqJSON } from './_lib/groq'
-import { buildCheckinMessages } from './_lib/prompt'
-import { checkGuardrails } from '../src/lib/guardrails'
-import { DecisionSchema, type Decision } from '../src/lib/decisionSchema'
-import { currentPhase, type Macrocycle } from '../src/lib/macrocycle'
-import { startOfWeekISO } from '../src/lib/week'
+import { clientFromRequest } from './_lib/supabaseServer.js'
+import { callGroqJSON } from './_lib/groq.js'
+import { buildCheckinMessages } from './_lib/prompt.js'
+import { checkGuardrails } from '../src/lib/guardrails.js'
+import { DecisionSchema, type Decision } from '../src/lib/decisionSchema.js'
+import { currentPhase, type Macrocycle } from '../src/lib/macrocycle.js'
+import { startOfWeekISO } from '../src/lib/week.js'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })

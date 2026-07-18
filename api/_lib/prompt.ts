@@ -1,4 +1,4 @@
-import type { ChatMessage } from './groq'
+import type { ChatMessage } from './groq.js'
 
 export interface WeeklyPromptInput {
   profile: {
