@@ -3,6 +3,7 @@ import { useSession } from '../auth/useSession'
 import { loadCurrentWeek, generateWeek, updateSession, type WeekPlan, type SessionRow } from '../lib/plans'
 import { Button, Card, Input, Field } from '../components/ui'
 import { SessionDetail } from '../components/SessionDetail'
+import { loadWeekStatus, type DayStatus } from '../lib/weekStatus'
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const TYPE_LABEL: Record<SessionRow['type'], string> = {
@@ -18,6 +19,7 @@ export default function Week() {
   const { session } = useSession()
   const uid = session?.user?.id
   const [plan, setPlan] = useState<WeekPlan | null>(null)
+  const [status, setStatus] = useState<Record<string, DayStatus>>({})
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -27,7 +29,9 @@ export default function Week() {
     if (!uid) return
     setLoading(true)
     try {
-      setPlan(await loadCurrentWeek(uid))
+      const p = await loadCurrentWeek(uid)
+      setPlan(p)
+      if (p) setStatus(await loadWeekStatus(uid, p.week_start))
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load plan')
     } finally {
@@ -78,9 +82,18 @@ export default function Week() {
         <Card key={s.id}>
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-accent">
-                {dayLabel(s.day)} · {TYPE_LABEL[s.type]}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-medium uppercase tracking-wide text-accent">
+                  {dayLabel(s.day)} · {TYPE_LABEL[s.type]}
+                </p>
+                {(() => {
+                  const st = status[s.day]
+                  if (!st) return null
+                  if (st.completed) return <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-medium text-accent">Done{st.actual_rpe ? ` · RPE ${st.actual_rpe}` : ''}</span>
+                  if (st.decision && st.decision !== 'keep') return <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[10px] font-medium text-muted">Adapted → {st.decision.replace('_', ' ')}</span>
+                  return null
+                })()}
+              </div>
               <p className="mt-1 font-medium">{s.focus}</p>
               <p className="text-sm text-muted">
                 {s.duration_min} min · RPE {s.target_rpe}
