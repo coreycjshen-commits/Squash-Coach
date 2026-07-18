@@ -6,6 +6,8 @@ const tabs = [
   { to: '/', label: 'Today' },
   { to: '/week', label: 'Week' },
   { to: '/coach', label: 'Coach' },
+  { to: '/journal', label: 'Journal' },
+  { to: '/progress', label: 'Progress' },
   { to: '/profile', label: 'Profile' },
 ]
 
