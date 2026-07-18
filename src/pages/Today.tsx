@@ -14,6 +14,7 @@ export default function Today() {
   const uid = auth?.user?.id
   const [ctx, setCtx] = useState<TodayContext | null>(null)
   const [loading, setLoading] = useState(true)
+  const [decisionError, setDecisionError] = useState<string | null>(null)
 
   async function refresh() {
     if (!uid) return
@@ -43,13 +44,19 @@ export default function Today() {
 
       {!ctx.checkin && (
         <CheckinForm onSubmit={async (input) => {
+          setDecisionError(null)
           await saveCheckin(uid!, input)
-          await requestDecision()
+          const r = await requestDecision()
+          if (!r.ok) setDecisionError(r.error ?? "Saved your check-in, but the coach couldn't weigh in right now.")
           await refresh()
         }} />
       )}
 
       {ctx.checkin && <RecoverySnapshot deltas={{ hrv_delta: ctx.checkin.hrv_delta, rhr_delta: ctx.checkin.rhr_delta, sleep_delta: ctx.checkin.sleep_delta }} acwr={ctx.checkin.acwr} />}
+
+      {decisionError && !ctx.checkin?.decision && (
+        <Card><p className="text-sm text-red-400">{decisionError}</p></Card>
+      )}
 
       {ctx.checkin?.decision && (
         <DecisionCard
