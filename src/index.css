@@ -3,22 +3,54 @@
 @tailwind utilities;
 
 :root {
-  /* deep navy / charcoal base, warm amber accent — values are R G B */
-  --bg: 11 18 32;          /* #0B1220 */
-  --surface: 17 25 42;     /* #11192A */
-  --surface-2: 24 34 54;   /* #182236 */
-  --border: 38 50 74;      /* #26324A */
-  --text: 232 237 245;     /* #E8EDF5 */
-  --muted: 148 163 184;    /* #94A3B8 */
-  --accent: 232 161 58;    /* #E8A13A amber */
-  --accent-fg: 20 14 4;    /* near-black text on amber */
+  /* Premium dark glass palette — R G B */
+  --bg: 6 9 17;            /* near-black navy */
+  --surface: 18 24 40;     /* solid fallback */
+  --surface-2: 30 39 60;   /* subtle raised panel (chips, code blocks) */
+  --border: 52 66 96;      /* subtle solid line */
+  --text: 237 241 249;
+  --muted: 152 164 186;
+  --accent: 234 165 62;    /* warm gold */
+  --accent-2: 250 214 140; /* light gold (gradient top) */
+  --accent-fg: 22 15 4;    /* near-black on gold */
 }
 
 html, body, #root { height: 100%; }
 
 body {
-  @apply bg-bg text-text font-sans antialiased;
+  @apply text-text font-sans antialiased;
   font-feature-settings: 'cv11', 'ss01';
+  min-height: 100dvh;
+  background:
+    radial-gradient(1100px 620px at 12% -8%, rgba(234, 165, 62, 0.13), transparent 60%),
+    radial-gradient(1000px 700px at 108% 4%, rgba(70, 104, 180, 0.18), transparent 55%),
+    radial-gradient(900px 900px at 50% 118%, rgba(120, 84, 200, 0.12), transparent 60%),
+    rgb(var(--bg));
+  background-attachment: fixed;
+}
+
+@layer base {
+  /* Condensed gothic display for headings + big numbers */
+  h1, h2, h3, h4 {
+    @apply font-display font-semibold tracking-wide;
+  }
+}
+
+@layer components {
+  /* Frosted glass surface */
+  .glass {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.03));
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: 0 10px 34px -12px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.10);
+  }
+  /* Lighter glass for form fields */
+  .glass-field {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -23,10 +23,10 @@ export function RadioCards({
             role="radio"
             aria-checked={selected}
             onClick={() => onChange(o.value)}
-            className={`rounded-2xl border p-4 text-left transition ${
+            className={`rounded-2xl border p-4 text-left backdrop-blur-md transition ${
               selected
-                ? 'border-accent bg-accent/10'
-                : 'border-border bg-surface hover:border-muted'
+                ? 'border-accent/60 bg-accent/12 shadow-[0_8px_24px_-12px_rgba(234,165,62,0.5)]'
+                : 'border-white/10 bg-white/[0.04] hover:border-white/25 hover:bg-white/[0.07]'
             }`}
           >
             <div className="font-medium text-text">{o.label}</div>

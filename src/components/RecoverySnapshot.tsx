@@ -33,7 +33,7 @@ function Stat({ label, value, tone }: { label: string; value: string; tone: stri
   return (
     <div>
       <div className="text-xs text-muted">{label}</div>
-      <div className={`text-lg font-semibold ${tone}`}>{value}</div>
+      <div className={`font-display text-xl font-semibold ${tone}`}>{value}</div>
     </div>
   )
 }

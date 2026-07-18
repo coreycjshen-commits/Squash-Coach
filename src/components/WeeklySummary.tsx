@@ -47,7 +47,7 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
   return (
     <div>
       <div className="text-xs text-muted">{label}</div>
-      <div className={`text-2xl font-semibold ${accent ? 'text-accent' : 'text-text'}`}>{value}</div>
+      <div className={`font-display text-3xl font-semibold ${accent ? 'text-accent' : 'text-text'}`}>{value}</div>
     </div>
   )
 }
