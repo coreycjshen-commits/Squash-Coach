@@ -51,24 +51,35 @@ Return STRICT JSON ONLY matching this shape:
 {"rationale": string, "sessions": [{"day_index": 0-6 (0=Mon), "type": "oncourt"|"strength"|"cardio"|"rest",
 "focus": string, "duration_min": int, "target_rpe": int 1-10, "detail": object}]}
 
-Every "detail" MUST be concrete and prescriptive — NEVER vague labels like "cardio" or "drills".
-Give exact numbers: modality, sets, reps, work/rest intervals, distances or durations, and targets.
-Requirements by type:
-- cardio: name the modality (court sprints / run / bike / erg / skipping) AND the full interval
-  structure with work, rest, and a target. e.g. "intervals": "8 × 40s court sprints @ RPE 9, 80s walk recovery"
-  or "8 × 2 min @ RPE 8, 90s jog". Steady-state must give duration + zone, e.g. "35 min run @ RPE 5 (zone 2)".
-- oncourt: list SPECIFIC drills each with sets/reps or duration and a target. e.g.
-  "drills": ["Straight-drive rails: 4 × 3 min each wall, land behind service line",
-  "6-corner ghosting: 5 × 45s work / 75s rest", "Boast-drive-drop condition game: 3 × 5 min"].
-  Include a "warm_up" and, for match/condition work, the rules/scoring.
-- strength: list each lift with sets × reps and load/RPE. e.g.
-  "lifts": ["Back squat 4 × 5 @ RPE 8", "Trap-bar RDL 3 × 6", "Cable rotation 3 × 10/side", "Nordic curl 3 × 6"].
-Prefer these JSON keys where relevant: "warm_up", "drills"/"lifts"/"intervals" (arrays of strings),
-"cool_down", "notes". Bake the athlete's focus areas into the specific drills chosen.
+Write "detail" like a REAL coach handing an athlete their session plan for the day — precise enough
+to execute without asking a single question. BANNED: vague phrases like "technique drills",
+"conditioning", "cardio", "ghosting patterns", "footwork drills", "core work". Every line must name
+the exact drill/exercise, the pattern or movement, sets × (reps or time), work:rest, and a measurable
+target or coaching cue. The numbers in "detail" must add up roughly to the session's duration_min.
 
-Example of ONE good session object:
-{"day_index":2,"type":"cardio","focus":"Repeated-sprint capacity","duration_min":40,"target_rpe":9,
-"detail":{"warm_up":"10 min easy jog + dynamic drills","intervals":"10 × 15s max court sprints, 45s walk recovery, then 4 min rest, repeat ×2 sets","cool_down":"5 min walk + mobility"}}
+Requirements by type:
+- oncourt: name each drill AS A REAL SQUASH DRILL with the shot pattern (who plays what, where) and a
+  target. Examples of the required specificity:
+  "Straight-drive length: feed to back corner, hit 8 consecutive drives landing behind the service box, both walls — 4 sets × 3 min/side, 60s rest",
+  "2-corner boast-drive: partner boasts, you run and hit straight drive then back to T — 5 × 90s, 60s rest",
+  "6-point ghosting (2 front, 2 mid, 2 back): explode to each corner and shadow the shot — 6 × 40s work / 50s rest",
+  "Drop-drive condition game to back-2/front-2: first to 11, must win by 2 — 3 games".
+  Always include "warm_up" (specific: e.g. "5 min court movement + 20 boast-drive-drive feeds each side").
+- cardio: name the modality AND the full interval structure with work, rest, sets, and a target.
+  e.g. "10 × 15s max court sprints (baseline↔front wall), 45s walk, ×2 sets, 3 min between sets @ RPE 9".
+  Steady-state must give duration + zone, e.g. "35 min run @ RPE 5 / zone 2, HR ~140-150".
+- strength: each lift with sets × reps AND load guidance (%1RM or RPE) and tempo/rest where it matters.
+  e.g. "Back squat 4 × 5 @ RPE 8 (~80%), 2-3 min rest", "Nordic curl 3 × 6 slow eccentric", "Pallof press 3 × 10/side".
+
+Prefer these JSON keys: "warm_up", "drills"/"lifts"/"intervals" (arrays of specific strings),
+"cool_down", "coaching_cue" (one key thing to focus on). Bake the athlete's focus areas into the
+actual drills chosen (e.g. if focus is "backhand length", the on-court drills must target backhand length).
+
+Two examples of the REQUIRED level of detail:
+{"day_index":0,"type":"oncourt","focus":"Backhand length & deep control","duration_min":75,"target_rpe":7,
+"detail":{"warm_up":"5 min movement + 3 min knock-up, 20 backhand boast-drive-drive feeds","drills":["Backhand straight-drive length: 8 drives landing behind service box — 5 sets × 3 min, 45s rest","Backhand boast + straight drive: partner boasts crosscourt, you drive straight — 4 × 90s each side","Length game backhand-side only: rally cross/straight, point ends if ball lands short of service line — 3 games to 11"],"cool_down":"8 min mobility (hips, T-spine, forearms)","coaching_cue":"Contact out in front, aim a racket-width off the side wall"}}
+{"day_index":3,"type":"cardio","focus":"Repeated-sprint capacity","duration_min":35,"target_rpe":9,
+"detail":{"warm_up":"10 min easy jog + leg swings","intervals":"10 × 15s max court sprints (baseline↔front wall), 45s walk recovery, 4 min rest, repeat ×2 sets","cool_down":"5 min walk + calf/quad stretch"}}
 
 The rationale is 1-3 sentences explaining the mix you chose for this phase and athlete.`
 
