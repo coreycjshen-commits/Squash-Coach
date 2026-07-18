@@ -50,7 +50,26 @@ recent context (e.g. ease back in after a break; protect freshness in-season; bu
 Return STRICT JSON ONLY matching this shape:
 {"rationale": string, "sessions": [{"day_index": 0-6 (0=Mon), "type": "oncourt"|"strength"|"cardio"|"rest",
 "focus": string, "duration_min": int, "target_rpe": int 1-10, "detail": object}]}
-"detail" holds the concrete session (e.g. lifts with sets/reps, interval structure, or ghosting patterns).
+
+Every "detail" MUST be concrete and prescriptive — NEVER vague labels like "cardio" or "drills".
+Give exact numbers: modality, sets, reps, work/rest intervals, distances or durations, and targets.
+Requirements by type:
+- cardio: name the modality (court sprints / run / bike / erg / skipping) AND the full interval
+  structure with work, rest, and a target. e.g. "intervals": "8 × 40s court sprints @ RPE 9, 80s walk recovery"
+  or "8 × 2 min @ RPE 8, 90s jog". Steady-state must give duration + zone, e.g. "35 min run @ RPE 5 (zone 2)".
+- oncourt: list SPECIFIC drills each with sets/reps or duration and a target. e.g.
+  "drills": ["Straight-drive rails: 4 × 3 min each wall, land behind service line",
+  "6-corner ghosting: 5 × 45s work / 75s rest", "Boast-drive-drop condition game: 3 × 5 min"].
+  Include a "warm_up" and, for match/condition work, the rules/scoring.
+- strength: list each lift with sets × reps and load/RPE. e.g.
+  "lifts": ["Back squat 4 × 5 @ RPE 8", "Trap-bar RDL 3 × 6", "Cable rotation 3 × 10/side", "Nordic curl 3 × 6"].
+Prefer these JSON keys where relevant: "warm_up", "drills"/"lifts"/"intervals" (arrays of strings),
+"cool_down", "notes". Bake the athlete's focus areas into the specific drills chosen.
+
+Example of ONE good session object:
+{"day_index":2,"type":"cardio","focus":"Repeated-sprint capacity","duration_min":40,"target_rpe":9,
+"detail":{"warm_up":"10 min easy jog + dynamic drills","intervals":"10 × 15s max court sprints, 45s walk recovery, then 4 min rest, repeat ×2 sets","cool_down":"5 min walk + mobility"}}
+
 The rationale is 1-3 sentences explaining the mix you chose for this phase and athlete.`
 
 export function buildWeeklyMessages(input: WeeklyPromptInput): ChatMessage[] {
