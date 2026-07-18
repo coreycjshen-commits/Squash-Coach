@@ -1,8 +1,7 @@
 import { supabase } from './supabase'
 import { todayISO } from './dates'
-import { startOfWeekISO } from './week'
 import {
-  computeBaseline, computeDeltas, computeACWR, type Baseline, type Deltas, type LoadEntry,
+  computeBaseline, computeDeltas, computeACWR, type LoadEntry,
 } from './baseline'
 import type { SoloDrill } from './solo'
 
@@ -46,7 +45,6 @@ export interface TodayContext {
   session: TodaySessionRow | null
   drills: SoloDrill[]
   completion: CompletionRow | null
-  recovery: { baseline: Baseline; deltas: Deltas; acwr: number | null } | null
 }
 
 export interface CheckinInput {
@@ -78,22 +76,12 @@ export async function loadTodayContext(userId: string): Promise<TodayContext> {
     .from('completed_sessions').select('id, actual_type, actual_duration, actual_rpe, notes')
     .eq('user_id', userId).eq('date', date).maybeSingle()
 
-  let recovery: TodayContext['recovery'] = null
-  if (checkin) {
-    recovery = {
-      baseline: { hrv: null, resting_hr: null, sleep_hours: null },
-      deltas: { hrv_delta: checkin.hrv_delta, rhr_delta: checkin.rhr_delta, sleep_delta: checkin.sleep_delta },
-      acwr: checkin.acwr,
-    }
-  }
-
   return {
     date,
     checkin: (checkin as CheckinRow) ?? null,
     session: (session as TodaySessionRow) ?? null,
     drills: (drills as SoloDrill[]) ?? [],
     completion: (completion as CompletionRow) ?? null,
-    recovery,
   }
 }
 
@@ -161,5 +149,3 @@ export async function completeSession(
   })
   if (error) throw error
 }
-
-export { startOfWeekISO }
